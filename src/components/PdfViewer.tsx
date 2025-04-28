@@ -122,75 +122,78 @@ export function PdfViewer({ document, isOpen, onClose }: PdfViewerProps) {
             </TabsList>
           </Tabs>
           
-          <TabsContent value="preview" className="flex-1 relative min-h-[500px] m-0 p-0">
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
-                <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                  <p className="text-sm text-muted-foreground">Loading document...</p>
+          {/* Main content area with Tabs wrapper */}
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1">
+            <TabsContent value="preview" className="flex-1 relative min-h-[500px] m-0 p-0 h-full">
+              {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
+                  <div className="flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                    <p className="text-sm text-muted-foreground">Loading document...</p>
+                  </div>
+                </div>
+              )}
+
+              <iframe
+                src={document.fileUrl}
+                title={document.title}
+                className="w-full h-full"
+                onLoad={() => setIsLoading(false)}
+              />
+            </TabsContent>
+            
+            <TabsContent value="email" className="m-0 p-4 space-y-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="recipient" className="text-sm font-medium">Recipient</label>
+                  <Input
+                    id="recipient"
+                    type="email"
+                    placeholder="customer@example.com"
+                    value={recipientEmail}
+                    onChange={(e) => setRecipientEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="subject" className="text-sm font-medium">Subject</label>
+                  <Input
+                    id="subject"
+                    placeholder="Subject"
+                    value={emailSubject}
+                    onChange={(e) => setEmailSubject(e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="body" className="text-sm font-medium">Message</label>
+                  <textarea
+                    id="body"
+                    placeholder="Write your message here..."
+                    className="w-full min-h-[200px] p-3 border rounded-md resize-y"
+                    value={emailBody}
+                    onChange={(e) => setEmailBody(e.target.value)}
+                  />
+                </div>
+                
+                <div className="pt-4 flex justify-end">
+                  <Button
+                    className="flex items-center gap-2"
+                    onClick={handleSendEmail}
+                    disabled={!recipientEmail || isSending}
+                  >
+                    {isSending ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                    {isSending ? "Sending..." : "Send Document"}
+                  </Button>
                 </div>
               </div>
-            )}
-
-            <iframe
-              src={document.fileUrl}
-              title={document.title}
-              className="w-full h-full"
-              onLoad={() => setIsLoading(false)}
-            />
-          </TabsContent>
-          
-          <TabsContent value="email" className="m-0 p-4 space-y-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="recipient" className="text-sm font-medium">Recipient</label>
-                <Input
-                  id="recipient"
-                  type="email"
-                  placeholder="customer@example.com"
-                  value={recipientEmail}
-                  onChange={(e) => setRecipientEmail(e.target.value)}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="subject" className="text-sm font-medium">Subject</label>
-                <Input
-                  id="subject"
-                  placeholder="Subject"
-                  value={emailSubject}
-                  onChange={(e) => setEmailSubject(e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="body" className="text-sm font-medium">Message</label>
-                <textarea
-                  id="body"
-                  placeholder="Write your message here..."
-                  className="w-full min-h-[200px] p-3 border rounded-md resize-y"
-                  value={emailBody}
-                  onChange={(e) => setEmailBody(e.target.value)}
-                />
-              </div>
-              
-              <div className="pt-4 flex justify-end">
-                <Button
-                  className="flex items-center gap-2"
-                  onClick={handleSendEmail}
-                  disabled={!recipientEmail || isSending}
-                >
-                  {isSending ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                  {isSending ? "Sending..." : "Send Document"}
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
+            </TabsContent>
+          </Tabs>
         </div>
       </DialogContent>
     </Dialog>
