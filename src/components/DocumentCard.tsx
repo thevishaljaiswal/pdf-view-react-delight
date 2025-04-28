@@ -2,9 +2,10 @@
 import { Document } from "@/types/document";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { FileText, Calendar } from "lucide-react";
+import { FileText, Calendar, Mail } from "lucide-react";
 import { useState } from "react";
 import { formatRelative } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 interface DocumentCardProps {
   document: Document;
@@ -42,7 +43,14 @@ export function DocumentCard({ document, onClick }: DocumentCardProps) {
         />
       </div>
       <CardHeader className="p-4 pb-2">
-        <h3 className="font-semibold text-lg line-clamp-1">{document.title}</h3>
+        <div className="flex justify-between items-start">
+          <h3 className="font-semibold text-lg line-clamp-1">{document.title}</h3>
+          {document.emailStatus && (
+            <Badge variant={document.emailStatus === "sent" ? "secondary" : "outline"} className="ml-2">
+              {document.emailStatus}
+            </Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="p-4 pt-0">
         <p className="text-muted-foreground text-sm line-clamp-2">{document.description}</p>
@@ -53,8 +61,17 @@ export function DocumentCard({ document, onClick }: DocumentCardProps) {
           <span>{document.fileSize}</span>
         </div>
         <div className="flex items-center space-x-1">
-          <Calendar size={14} />
-          <span>{formattedDate}</span>
+          {document.emailStatus === "sent" ? (
+            <>
+              <Mail size={14} />
+              <span>Sent {document.lastSentDate ? formatRelative(new Date(document.lastSentDate), new Date()) : ''}</span>
+            </>
+          ) : (
+            <>
+              <Calendar size={14} />
+              <span>{formattedDate}</span>
+            </>
+          )}
         </div>
       </CardFooter>
     </Card>

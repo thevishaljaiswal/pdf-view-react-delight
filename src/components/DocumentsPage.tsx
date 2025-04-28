@@ -11,22 +11,31 @@ import { Document } from "@/types/document";
 import { PdfViewer } from "./PdfViewer";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, File, FolderOpen } from "lucide-react";
+import { Search, File, FolderOpen, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function DocumentsPage() {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [activeView, setActiveView] = useState<"all" | "emails">("all");
   
   const categories = getCategories();
   
   // Get filtered documents based on category and search query
   const getFilteredDocuments = () => {
-    const categoryFiltered = filterDocumentsByCategory(activeCategory);
-    if (!searchQuery) return categoryFiltered;
+    let docs = filterDocumentsByCategory(activeCategory);
+    
+    if (activeView === "emails") {
+      docs = docs.filter(doc => doc.emailStatus);
+    }
+    
+    if (!searchQuery) return docs;
+    
     return searchDocuments(searchQuery).filter(
-      doc => activeCategory === 'All' || doc.category === activeCategory
+      doc => (activeCategory === 'All' || doc.category === activeCategory) && 
+      (activeView === 'all' || (activeView === 'emails' && doc.emailStatus))
     );
   };
   
@@ -47,7 +56,7 @@ export function DocumentsPage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">Document Library</h1>
           <p className="text-muted-foreground">
-            Browse and view your PDF documents
+            Browse, view and send documents to customers
           </p>
         </div>
         
@@ -62,20 +71,33 @@ export function DocumentsPage() {
             />
           </div>
           
-          <Tabs 
-            defaultValue="All" 
-            value={activeCategory}
-            onValueChange={setActiveCategory}
-            className="w-full md:w-auto"
-          >
-            <TabsList className="w-full overflow-x-auto">
-              {categories.map((category) => (
-                <TabsTrigger key={category} value={category} className="min-w-fit">
-                  {category}
+          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <Tabs defaultValue={activeView} value={activeView} onValueChange={(v) => setActiveView(v as "all" | "emails")} className="w-full sm:w-auto">
+              <TabsList className="grid w-full grid-cols-2 sm:w-auto">
+                <TabsTrigger value="all" className="flex items-center gap-2">
+                  <File size={16} />
+                  <span>All Documents</span>
                 </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+                <TabsTrigger value="emails" className="flex items-center gap-2">
+                  <Mail size={16} />
+                  <span>Email History</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <Button 
+              key={category} 
+              variant={activeCategory === category ? "default" : "outline"} 
+              size="sm"
+              onClick={() => setActiveCategory(category)}
+            >
+              {category}
+            </Button>
+          ))}
         </div>
         
         {filteredDocuments.length === 0 ? (
@@ -85,7 +107,9 @@ export function DocumentsPage() {
             <p className="text-sm">
               {searchQuery 
                 ? "Try adjusting your search or filters" 
-                : "There are no documents in this category yet"}
+                : activeView === "emails" 
+                  ? "No documents have been emailed yet" 
+                  : "There are no documents in this category yet"}
             </p>
           </div>
         ) : (

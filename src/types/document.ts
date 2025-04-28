@@ -9,4 +9,8 @@ export interface Document {
   thumbnailUrl: string;
   fileUrl: string;
   category: string;
+  recipientEmail?: string;
+  emailSubject?: string;
+  emailStatus?: "sent" | "draft" | "scheduled" | null;
+  lastSentDate?: string | null;
 }
