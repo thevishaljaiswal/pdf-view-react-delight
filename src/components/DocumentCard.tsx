@@ -1,10 +1,9 @@
 
 import { Document } from "@/types/document";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { FileText, Calendar, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { useState } from "react";
-import { formatRelative } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 
 interface DocumentCardProps {
@@ -15,11 +14,6 @@ interface DocumentCardProps {
 export function DocumentCard({ document, onClick }: DocumentCardProps) {
   const [isHovering, setIsHovering] = useState(false);
   
-  const formattedDate = formatRelative(
-    new Date(document.updatedAt),
-    new Date()
-  );
-
   return (
     <Card
       className={cn(
@@ -42,38 +36,20 @@ export function DocumentCard({ document, onClick }: DocumentCardProps) {
           className="object-cover w-full h-full transition-transform duration-500"
         />
       </div>
-      <CardHeader className="p-4 pb-2">
-        <div className="flex justify-between items-start">
-          <h3 className="font-semibold text-lg line-clamp-1">{document.title}</h3>
-          {document.emailStatus && (
-            <Badge variant={document.emailStatus === "sent" ? "secondary" : "outline"} className="ml-2">
-              {document.emailStatus}
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="p-4 pt-0">
-        <p className="text-muted-foreground text-sm line-clamp-2">{document.description}</p>
-      </CardContent>
-      <CardFooter className="p-4 pt-0 flex justify-between items-center text-xs text-muted-foreground">
-        <div className="flex items-center space-x-1">
-          <FileText size={14} />
-          <span>{document.fileSize}</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          {document.emailStatus === "sent" ? (
-            <>
-              <Mail size={14} />
-              <span>Sent {document.lastSentDate ? formatRelative(new Date(document.lastSentDate), new Date()) : ''}</span>
-            </>
-          ) : (
-            <>
-              <Calendar size={14} />
-              <span>{formattedDate}</span>
-            </>
-          )}
-        </div>
-      </CardFooter>
+      <div className="p-4 flex justify-between items-center">
+        {document.emailStatus && (
+          <Badge 
+            variant={document.emailStatus === "sent" ? "secondary" : "outline"}
+            className="text-xs font-medium"
+          >
+            {document.emailStatus === "sent" && (
+              <Mail className="mr-1 h-3 w-3" />
+            )}
+            {document.emailStatus}
+          </Badge>
+        )}
+        {!document.emailStatus && <div />}
+      </div>
     </Card>
   );
 }
